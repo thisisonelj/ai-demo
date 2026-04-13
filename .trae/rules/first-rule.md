@@ -84,3 +84,9 @@
 - **State Management**: 前端状态管理必须采用Redux，遵循单向数据流原则，使用Redux Toolkit简化开发。
 - **UI Component Library**: 前端UI组件库必须采用Ant Design，确保界面风格统一和开发效率。
 - **Deployment**: 前端部署必须采用Nginx，负责静态资源服务、路由转发和负载均衡。
+
+## Context7 Rules
+ - Always use Context7 when I need library/API documentation, code generation, setup or     configuration steps without me having to explicitly ask.
+
+## MCP Server Rules
+- **General**: All interactions with the MCP Server should adhere to best practices for security and resource management.
