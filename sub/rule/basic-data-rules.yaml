@@ -1,0 +1,182 @@
+# 基础数据模块 Rules
+
+## 模块规则
+
+### 功能规则
+
+1. **品牌管理**
+   - 支持品牌的增删改查操作
+   - 品牌名称必须唯一
+   - 支持品牌的导入导出功能，导入格式为Excel
+   - 支持品牌的排序功能
+   - 删除品牌时，必须确保该品牌下没有关联的型号
+
+2. **型号管理**
+   - 支持型号的增删改查操作
+   - 型号名称在同一品牌下必须唯一
+   - 支持型号的导入导出功能，导入格式为Excel
+   - 支持按品牌筛选型号
+   - 删除型号时，必须确保该型号下没有关联的车辆
+
+3. **颜色管理**
+   - 支持颜色的增删改查操作
+   - 颜色名称和颜色代码必须唯一
+   - 支持颜色的导入导出功能，导入格式为Excel
+   - 支持颜色预览功能
+   - 删除颜色时，必须确保该颜色下没有关联的车辆
+
+4. **状态管理**
+   - 支持车辆状态的增删改查操作
+   - 状态名称必须唯一
+   - 支持状态的导入导出功能，导入格式为Excel
+   - 支持状态的排序功能
+   - 删除状态时，必须确保该状态下没有关联的车辆
+
+### 技术规则
+
+1. **后端技术**
+   - 使用Node.js + Express框架
+   - 数据库使用MySQL
+   - 实现RESTful API接口
+   - 使用Sequelize ORM进行数据库操作
+   - 支持Excel文件的导入导出
+
+2. **前端技术**
+   - 使用React框架
+   - 使用Ant Design组件库
+   - 使用Redux进行状态管理
+   - 使用react-router-dom进行路由管理
+   - 实现表格、表单、筛选器等组件
+   - 支持文件上传和下载
+
+3. **安全规则**
+   - 所有API接口必须验证JWT token
+   - 只有admin可以修改基础数据
+   - 防止SQL注入和XSS攻击
+
+### 接口规则
+
+1. **API接口**
+   - **品牌管理**
+     - GET /api/brands - 获取品牌列表
+       - 查询参数：page, limit, sort
+       - 响应：{success: true, brands, total, page, limit}
+     - POST /api/brands - 创建品牌
+       - 请求体：{name}
+       - 响应：{success: true, brand}
+     - GET /api/brands/:id - 获取品牌详情
+       - 响应：{success: true, brand}
+     - PUT /api/brands/:id - 更新品牌
+       - 请求体：{name}
+       - 响应：{success: true, brand}
+     - DELETE /api/brands/:id - 删除品牌
+       - 响应：{success: true, message: "品牌删除成功"}
+     - POST /api/brands/import - 导入品牌
+       - 请求体：multipart/form-data，包含Excel文件
+       - 响应：{success: true, imported: 10, failed: 0}
+     - GET /api/brands/export - 导出品牌
+       - 响应：Excel文件
+
+   - **型号管理**
+     - GET /api/models - 获取型号列表
+       - 查询参数：brand_id, page, limit, sort
+       - 响应：{success: true, models, total, page, limit}
+     - POST /api/models - 创建型号
+       - 请求体：{brand_id, name}
+       - 响应：{success: true, model}
+     - GET /api/models/:id - 获取型号详情
+       - 响应：{success: true, model}
+     - PUT /api/models/:id - 更新型号
+       - 请求体：{brand_id, name}
+       - 响应：{success: true, model}
+     - DELETE /api/models/:id - 删除型号
+       - 响应：{success: true, message: "型号删除成功"}
+     - POST /api/models/import - 导入型号
+       - 请求体：multipart/form-data，包含Excel文件
+       - 响应：{success: true, imported: 10, failed: 0}
+     - GET /api/models/export - 导出型号
+       - 响应：Excel文件
+
+   - **颜色管理**
+     - GET /api/colors - 获取颜色列表
+       - 查询参数：page, limit, sort
+       - 响应：{success: true, colors, total, page, limit}
+     - POST /api/colors - 创建颜色
+       - 请求体：{name, code}
+       - 响应：{success: true, color}
+     - GET /api/colors/:id - 获取颜色详情
+       - 响应：{success: true, color}
+     - PUT /api/colors/:id - 更新颜色
+       - 请求体：{name, code}
+       - 响应：{success: true, color}
+     - DELETE /api/colors/:id - 删除颜色
+       - 响应：{success: true, message: "颜色删除成功"}
+     - POST /api/colors/import - 导入颜色
+       - 请求体：multipart/form-data，包含Excel文件
+       - 响应：{success: true, imported: 10, failed: 0}
+     - GET /api/colors/export - 导出颜色
+       - 响应：Excel文件
+
+   - **状态管理**
+     - GET /api/vehicle-statuses - 获取车辆状态列表
+       - 查询参数：page, limit, sort
+       - 响应：{success: true, statuses, total, page, limit}
+     - POST /api/vehicle-statuses - 创建车辆状态
+       - 请求体：{name}
+       - 响应：{success: true, status}
+     - GET /api/vehicle-statuses/:id - 获取车辆状态详情
+       - 响应：{success: true, status}
+     - PUT /api/vehicle-statuses/:id - 更新车辆状态
+       - 请求体：{name}
+       - 响应：{success: true, status}
+     - DELETE /api/vehicle-statuses/:id - 删除车辆状态
+       - 响应：{success: true, message: "状态删除成功"}
+     - POST /api/vehicle-statuses/import - 导入车辆状态
+       - 请求体：multipart/form-data，包含Excel文件
+       - 响应：{success: true, imported: 10, failed: 0}
+     - GET /api/vehicle-statuses/export - 导出车辆状态
+       - 响应：Excel文件
+
+2. **前端路由**
+   - /basic-data - 基础数据管理页面（需要admin权限）
+   - /basic-data/brands - 品牌管理页面（需要admin权限）
+   - /basic-data/models - 型号管理页面（需要admin权限）
+   - /basic-data/colors - 颜色管理页面（需要admin权限）
+   - /basic-data/statuses - 状态管理页面（需要admin权限）
+
+### 数据规则
+
+1. **品牌表**
+   - 表名：brands
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+2. **型号表**
+   - 表名：models
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - brand_id: INT NOT NULL REFERENCES brands(id)
+     - name: VARCHAR(50) NOT NULL
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+   - 唯一约束：(brand_id, name)
+
+3. **颜色表**
+   - 表名：colors
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - code: VARCHAR(20) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+4. **状态表**
+   - 表名：vehicle_statuses
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

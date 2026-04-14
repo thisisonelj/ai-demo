@@ -1,0 +1,128 @@
+# 车辆管理模块 Rules
+
+## 模块规则
+
+### 功能规则
+
+1. **车辆信息录入**
+   - 必须包含品牌、型号、颜色、状态、VIN码、价格、库存等字段
+   - VIN码必须唯一
+   - 支持单个录入和批量导入
+   - 批量导入支持Excel格式
+   - 导入数据必须进行验证，验证失败的记录需给出详细错误信息
+
+2. **车辆信息查询**
+   - 支持按品牌、型号、颜色、状态、价格范围等条件筛选
+   - 支持按价格、库存、创建时间等字段排序
+   - 支持分页，默认每页10条记录
+   - 查询响应时间不超过1秒
+
+3. **车辆状态管理**
+   - 车辆状态包括：库存、销售中、已售出、维修中、报废
+   - 支持单个和批量更新车辆状态
+   - 状态变更需记录变更历史
+   - 已售出车辆不能再变更为其他状态
+
+### 技术规则
+
+1. **后端技术**
+   - 使用Node.js + Express框架
+   - 数据库使用MySQL
+   - 实现RESTful API接口
+   - 支持文件上传（车辆图片），存储在本地或云存储
+   - 使用Sequelize ORM进行数据库操作
+
+2. **前端技术**
+   - 使用React框架
+   - 使用Ant Design组件库
+   - 使用Redux进行状态管理
+   - 使用react-router-dom进行路由管理
+   - 实现表格、表单、筛选器等组件
+   - 支持文件上传和预览
+
+3. **安全规则**
+   - 所有API接口必须验证JWT token
+   - 只有admin和授权用户可以修改车辆信息
+   - 防止SQL注入和XSS攻击
+   - 文件上传必须验证文件类型和大小
+
+### 接口规则
+
+1. **API接口**
+   - POST /api/vehicles - 创建车辆信息
+     - 请求体：{brand_id, model_id, color_id, status_id, vin, price, stock, description, image_url}
+     - 响应：{success: true, vehicle}
+   - GET /api/vehicles - 查询车辆列表
+     - 查询参数：brand_id, model_id, color_id, status_id, min_price, max_price, page, limit, sort
+     - 响应：{success: true, vehicles, total, page, limit}
+   - GET /api/vehicles/:id - 获取车辆详情
+     - 响应：{success: true, vehicle}
+   - PUT /api/vehicles/:id - 更新车辆信息
+     - 请求体：{brand_id, model_id, color_id, status_id, vin, price, stock, description, image_url}
+     - 响应：{success: true, vehicle}
+   - DELETE /api/vehicles/:id - 删除车辆信息
+     - 响应：{success: true, message: "车辆删除成功"}
+   - POST /api/vehicles/batch - 批量导入车辆
+     - 请求体：multipart/form-data，包含Excel文件
+     - 响应：{success: true, imported: 10, failed: 0}
+   - PUT /api/vehicles/:id/status - 更新车辆状态
+     - 请求体：{status_id}
+     - 响应：{success: true, vehicle}
+
+2. **前端路由**
+   - /vehicles - 车辆列表页面（需要登录）
+   - /vehicles/create - 创建车辆页面（需要admin权限）
+   - /vehicles/:id - 车辆详情页面（需要登录）
+   - /vehicles/:id/edit - 编辑车辆页面（需要admin权限）
+
+### 数据规则
+
+1. **车辆表**
+   - 表名：vehicles
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - brand_id: INT NOT NULL REFERENCES brands(id)
+     - model_id: INT NOT NULL REFERENCES models(id)
+     - color_id: INT NOT NULL REFERENCES colors(id)
+     - status_id: INT NOT NULL REFERENCES vehicle_statuses(id)
+     - vin: VARCHAR(50) UNIQUE NOT NULL
+     - price: DECIMAL(10,2) NOT NULL
+     - stock: INT NOT NULL DEFAULT 0
+     - description: TEXT
+     - image_url: VARCHAR(255)
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+2. **品牌表**
+   - 表名：brands
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+3. **型号表**
+   - 表名：models
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - brand_id: INT NOT NULL REFERENCES brands(id)
+     - name: VARCHAR(50) NOT NULL
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+4. **颜色表**
+   - 表名：colors
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - code: VARCHAR(20) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+5. **状态表**
+   - 表名：vehicle_statuses
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - name: VARCHAR(50) NOT NULL UNIQUE
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

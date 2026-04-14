@@ -1,0 +1,95 @@
+# 用户登录模块 Rules
+
+## 模块规则
+
+### 功能规则
+
+1. **用户注册**
+   - 必须包含用户名、邮箱、手机号和密码字段
+   - 密码长度至少8位，包含大小写字母和数字
+   - 邮箱和手机号必须唯一
+   - 注册成功后自动登录并返回JWT token
+
+2. **用户登录**
+   - 支持使用邮箱/手机号+密码登录
+   - 支持记住登录状态
+   - 登录失败超过5次后锁定账号30分钟
+   - 登录成功后返回JWT token和用户信息
+
+3. **用户权限管理**
+   - 实现基于角色的访问控制（RBAC）
+   - 角色分为admin和user两种
+   - admin可以访问所有功能
+   - user只能访问授权的功能
+   - 所有需要权限的API必须验证JWT token
+
+### 技术规则
+
+1. **后端技术**
+   - 使用Node.js + Express框架
+   - 数据库使用MySQL
+   - 使用bcrypt进行密码加密，盐值长度至少10
+   - 使用jsonwebtoken生成JWT token，过期时间24小时
+   - 实现错误处理中间件
+
+2. **前端技术**
+   - 使用React框架
+   - 使用Ant Design组件库
+   - 使用Redux进行状态管理
+   - 使用react-router-dom进行路由管理
+   - 实现登录状态持久化（localStorage）
+   - 实现路由守卫，防止未登录用户访问受保护页面
+
+3. **安全规则**
+   - 密码必须加密存储，不得明文保存
+   - JWT token必须包含用户ID和角色信息
+   - API接口必须验证JWT token的有效性
+   - 防止SQL注入和XSS攻击
+   - 敏感操作必须二次验证
+
+### 接口规则
+
+1. **API接口**
+   - POST /api/auth/register - 用户注册
+     - 请求体：{username, email, phone, password}
+     - 响应：{success: true, token, user}
+   - POST /api/auth/login - 用户登录
+     - 请求体：{email/phone, password, remember}
+     - 响应：{success: true, token, user}
+   - GET /api/auth/me - 获取当前用户信息
+     - 请求头：Authorization: Bearer {token}
+     - 响应：{success: true, user}
+   - PUT /api/auth/update - 更新用户信息
+     - 请求头：Authorization: Bearer {token}
+     - 请求体：{username, email, phone}
+     - 响应：{success: true, user}
+   - PUT /api/auth/change-password - 修改密码
+     - 请求头：Authorization: Bearer {token}
+     - 请求体：{oldPassword, newPassword}
+     - 响应：{success: true, message: "密码修改成功"}
+
+2. **前端路由**
+   - /login - 登录页面（不需要权限）
+   - /register - 注册页面（不需要权限）
+   - /dashboard - 仪表盘（需要登录）
+   - /users - 用户管理（需要admin权限）
+
+### 数据规则
+
+1. **用户表**
+   - 表名：users
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - username: VARCHAR(50) NOT NULL
+     - email: VARCHAR(100) UNIQUE NOT NULL
+     - phone: VARCHAR(20) UNIQUE NOT NULL
+     - password_hash: VARCHAR(255) NOT NULL
+     - role: ENUM('admin', 'user') DEFAULT 'user'
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+2. **数据验证**
+   - 用户名：长度3-50字符，只能包含字母、数字和下划线
+   - 邮箱：必须符合邮箱格式
+   - 手机号：必须符合手机号格式
+   - 密码：长度至少8位，包含大小写字母和数字

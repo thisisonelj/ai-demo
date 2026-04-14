@@ -1,0 +1,98 @@
+# 订单管理模块 Rules
+
+## 模块规则
+
+### 功能规则
+
+1. **订单创建**
+   - 必须包含用户信息、车辆信息、价格信息、支付方式等字段
+   - 订单创建前必须检查车辆库存是否充足
+   - 订单创建成功后自动扣减车辆库存
+   - 支持多种支付方式（如支付宝、微信支付）
+
+2. **订单查询**
+   - 支持按用户ID、车辆ID、订单状态、创建时间范围等条件筛选
+   - 支持按创建时间、总价格等字段排序
+   - 支持分页，默认每页10条记录
+   - 提供订单详情查看，包括车辆信息、支付信息等
+
+3. **订单状态管理**
+   - 订单状态包括：待支付、已支付、待发货、已发货、已完成、已取消
+   - 支持状态流转：待支付 → 已支付 → 待发货 → 已发货 → 已完成
+   - 待支付订单可以取消
+   - 已支付订单取消需处理退款
+   - 状态变更需记录变更历史
+
+### 技术规则
+
+1. **后端技术**
+   - 使用Node.js + Express框架
+   - 数据库使用MySQL
+   - 实现RESTful API接口
+   - 集成支付网关（如支付宝、微信支付）
+   - 使用Sequelize ORM进行数据库操作
+   - 实现事务处理，确保订单创建和库存更新的原子性
+
+2. **前端技术**
+   - 使用React框架
+   - 使用Ant Design组件库
+   - 使用Redux进行状态管理
+   - 使用react-router-dom进行路由管理
+   - 实现表格、表单、筛选器等组件
+   - 支持订单状态变更操作
+
+3. **安全规则**
+   - 所有API接口必须验证JWT token
+   - 只有admin和授权用户可以修改订单信息
+   - 防止SQL注入和XSS攻击
+   - 支付信息必须加密传输
+
+### 接口规则
+
+1. **API接口**
+   - POST /api/orders - 创建订单
+     - 请求体：{user_id, vehicle_id, total_price, payment_method}
+     - 响应：{success: true, order, payment_url}
+   - GET /api/orders - 查询订单列表
+     - 查询参数：user_id, vehicle_id, status, start_date, end_date, page, limit, sort
+     - 响应：{success: true, orders, total, page, limit}
+   - GET /api/orders/:id - 获取订单详情
+     - 响应：{success: true, order}
+   - PUT /api/orders/:id - 更新订单信息
+     - 请求体：{user_id, vehicle_id, total_price, payment_method}
+     - 响应：{success: true, order}
+   - DELETE /api/orders/:id - 删除订单
+     - 响应：{success: true, message: "订单删除成功"}
+   - PUT /api/orders/:id/status - 更新订单状态
+     - 请求体：{status}
+     - 响应：{success: true, order}
+
+2. **前端路由**
+   - /orders - 订单列表页面（需要登录）
+   - /orders/create - 创建订单页面（需要登录）
+   - /orders/:id - 订单详情页面（需要登录）
+   - /orders/:id/edit - 编辑订单页面（需要admin权限）
+
+### 数据规则
+
+1. **订单表**
+   - 表名：orders
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - user_id: INT NOT NULL REFERENCES users(id)
+     - vehicle_id: INT NOT NULL REFERENCES vehicles(id)
+     - total_price: DECIMAL(10,2) NOT NULL
+     - status: ENUM('待支付', '已支付', '待发货', '已发货', '已完成', '已取消') DEFAULT '待支付'
+     - payment_method: ENUM('支付宝', '微信支付', '银行转账')
+     - payment_status: ENUM('未支付', '已支付', '支付失败') DEFAULT '未支付'
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+2. **订单状态变更历史表**
+   - 表名：order_status_history
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - order_id: INT NOT NULL REFERENCES orders(id)
+     - old_status: VARCHAR(50) NOT NULL
+     - new_status: VARCHAR(50) NOT NULL
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP

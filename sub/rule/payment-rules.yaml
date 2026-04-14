@@ -1,0 +1,93 @@
+# 支付模块 Rules
+
+## 模块规则
+
+### 功能规则
+
+1. **支付订单**
+   - 支持多种支付方式（如支付宝、微信支付、银行转账）
+   - 生成支付链接或二维码
+   - 处理支付回调，确保回调的安全性和可靠性
+   - 支付成功后自动更新订单状态为已支付
+   - 支付失败时提供错误信息和重试机制
+
+2. **查询支付订单状态**
+   - 实时同步支付渠道的支付结果
+   - 更新本地订单状态
+   - 提供支付历史记录查询
+   - 支持按订单ID、支付方式、支付状态等条件筛选
+
+### 技术规则
+
+1. **后端技术**
+   - 使用Node.js + Express框架
+   - 数据库使用MySQL
+   - 集成第三方支付网关（如支付宝、微信支付）
+   - 实现RESTful API接口
+   - 使用Sequelize ORM进行数据库操作
+   - 实现支付回调的签名验证
+
+2. **前端技术**
+   - 使用React框架
+   - 使用Ant Design组件库
+   - 使用Redux进行状态管理
+   - 使用react-router-dom进行路由管理
+   - 实现支付页面和支付状态查询界面
+   - 支持二维码生成和扫描
+
+3. **安全规则**
+   - 所有API接口必须验证JWT token
+   - 支付信息必须加密传输
+   - 支付回调必须验证签名，防止伪造回调
+   - 防止SQL注入和XSS攻击
+
+### 接口规则
+
+1. **API接口**
+   - POST /api/payments - 创建支付订单
+     - 请求体：{order_id, payment_method, payment_amount}
+     - 响应：{success: true, payment, payment_url}
+   - GET /api/payments - 查询支付订单列表
+     - 查询参数：order_id, payment_method, status, start_date, end_date, page, limit, sort
+     - 响应：{success: true, payments, total, page, limit}
+   - GET /api/payments/:id - 获取支付订单详情
+     - 响应：{success: true, payment}
+   - PUT /api/payments/:id - 更新支付订单信息
+     - 请求体：{payment_method, payment_amount, status}
+     - 响应：{success: true, payment}
+   - DELETE /api/payments/:id - 删除支付订单
+     - 响应：{success: true, message: "支付订单删除成功"}
+   - GET /api/payments/:id/status - 查询支付订单状态
+     - 响应：{success: true, payment, status}
+   - POST /api/payments/callback - 支付回调
+     - 请求体：支付网关回调数据
+     - 响应：{success: true, message: "回调处理成功"}
+
+2. **前端路由**
+   - /payments - 支付订单列表页面（需要登录）
+   - /payments/create - 创建支付订单页面（需要登录）
+   - /payments/:id - 支付订单详情页面（需要登录）
+   - /payments/:id/status - 支付订单状态页面（需要登录）
+
+### 数据规则
+
+1. **支付表**
+   - 表名：payments
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - order_id: INT NOT NULL REFERENCES orders(id)
+     - payment_method: ENUM('支付宝', '微信支付', '银行转账') NOT NULL
+     - payment_amount: DECIMAL(10,2) NOT NULL
+     - transaction_id: VARCHAR(100)
+     - status: ENUM('待支付', '已支付', '支付失败', '退款中', '已退款') DEFAULT '待支付'
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+     - updated_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+
+2. **支付日志表**
+   - 表名：payment_logs
+   - 字段：
+     - id: INT PRIMARY KEY AUTO_INCREMENT
+     - payment_id: INT NOT NULL REFERENCES payments(id)
+     - action: VARCHAR(100) NOT NULL
+     - message: TEXT
+     - created_at: TIMESTAMP DEFAULT CURRENT_TIMESTAMP
